@@ -1,0 +1,27 @@
+<head>
+  <title>chess</title>
+</head>
+
+<body>
+  <h1>Haihua Wang's Chess</h1>
+  {{> main}}
+  {{> button}}
+
+  {{> status}}
+</body>
+
+<template name="main">
+  {{title}}
+  <div id="board" style="width: 500px"></div>
+</template>
+
+<template name="button">
+  <input type="button" id="startBtn" value="Restart" class="button"/>
+</template>
+
+<template name="status">
+  <p>Status: <span id="status"></span></p>
+  <p>Count: {{count}}</p>
+  <p>FEN: <span id="fen"></span></p>
+  <p>PGN: <span id="pgn"></span></p>
+</template>
