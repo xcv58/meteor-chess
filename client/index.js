@@ -3,7 +3,7 @@ var board, game;
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
 var onDragStart = function(source, piece, position, orientation) {
-    if (Session.get("counter") >= 1) {
+    if (Session.get("counter") >= Session.get("MAX")) {
         alert("run out");
         return false;
     }
@@ -46,9 +46,6 @@ var onDrop = function(source, target) {
 
 // update the board position after the piece snap
 // for castling, en passant, pawn promotion
-var onSnapEnd = function() {
-    board.position(game.fen());
-};
 
 function updateGame() {
     data = Board.findOne("id");
@@ -57,8 +54,6 @@ function updateGame() {
         move = data.history[i];
         source = move.source;
         target = move.target;
-        console.log("source: " + source);
-        console.log("target: " + target);
         var result = game.move({
             from: source,
             to: target,
@@ -66,12 +61,22 @@ function updateGame() {
         });
         if (result === null) {
             console.log("invalid move");
-        } else {
-            console.log("valid move");
         }
     }
+    direction = Session.get("direction");
+    if (direction === undefined) {
+        direction = game.turn();
+        Session.set("direction", direction);
+    }
+    if (direction === 'w') {
+        board.orientation('white');
+    } else {
+        board.orientation('black');
+    }
+
     board.position(data.position);
     updateStatus();
+    return game.turn();
 }
 
 var updateStatus = function() {
@@ -134,7 +139,6 @@ function createBoard() {
         onDragStart: onDragStart,
         onDrop: onDrop,
         // onChange: onChange,
-        onSnapEnd: onSnapEnd
     };
     board = new ChessBoard('board', cfg);
     updateGame();
@@ -153,14 +157,20 @@ Meteor.subscribe('board', function() {
 
 Meteor.startup(function (){
     Session.setDefault('counter', 0);
+    Session.setDefault('MAX', 1);
 });
 
 Template.main.helpers({
     title: function() {
-        data = Board.findOne("id");
+        // data = Board.findOne("id");
         // createBoard();
         updateGame();
-        return data.position;
+
+        var moveColor = 'White';
+        if (game.turn() === 'b') {
+            moveColor = 'Black';
+        }
+        return moveColor;
     },
 });
 
@@ -170,6 +180,7 @@ Template.button.events({
         data.history = [];
         data.position = "start";
         Session.set('counter', 0);
+        Session.set('direction', 'w');
         Board.update("id", data);
     },
 });
@@ -177,5 +188,36 @@ Template.button.events({
 Template.status.helpers({
     count: function() {
         return Session.get('counter');
+    },
+    max: function() {
+        return Session.get('MAX');
+    },
+})
+
+Template.status.events({
+    'keydown input[type=number]': function(event) {
+        // ESC or ENTER
+        if (event.which === 27 || event.which === 13) {
+            event.preventDefault();
+            event.target.blur();
+        }
+    },
+
+    'click #max': function(event) {
+        console.log(event.target.value);
+        Session.set("MAX", event.target.value);
+    },
+
+    // update the text of the item on keypress but throttle the event to ensure
+    // we don't flood the server with updates (handles the event at most once
+    // every 300ms)
+    'keyup input[type=number]': function(event) {
+        var charCode = (event.which) ? event.which : event.keyCode;
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return;
+        }
+        event.target.value;
+        console.log(event.target.value);
+        Session.set("MAX", event.target.value);
     },
 })
