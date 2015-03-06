@@ -172,7 +172,13 @@ Template.main.helpers({
         if (game.turn() === 'b') {
             moveColor = 'Black';
         }
-        return moveColor;
+        if (game.game_over() === true) {
+            if (game.turn() === 'b') {
+                moveColor = 'White';
+            }
+            return 'Game Over, ' + moveColor + ' win!';
+        }
+        return moveColor + ' turn!';
     },
 });
 
