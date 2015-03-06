@@ -158,6 +158,8 @@ Meteor.subscribe('board', function() {
 Meteor.startup(function (){
     Session.setDefault('counter', 0);
     Session.setDefault('MAX', 1);
+    Session.setDefault('password', 'password');
+    Session.setDefault('login', false);
 });
 
 Template.main.helpers({
@@ -174,17 +176,6 @@ Template.main.helpers({
     },
 });
 
-Template.button.events({
-    'click #startBtn': function(event, template) {
-        data = Board.findOne("id");
-        data.history = [];
-        data.position = "start";
-        Session.set('counter', 0);
-        Session.set('direction', 'w');
-        Board.update("id", data);
-    },
-});
-
 Template.status.helpers({
     count: function() {
         return Session.get('counter');
@@ -192,6 +183,9 @@ Template.status.helpers({
     max: function() {
         return Session.get('MAX');
     },
+    login: function() {
+        return Session.get('login');
+    }
 })
 
 Template.status.events({
@@ -208,9 +202,16 @@ Template.status.events({
         Session.set("MAX", event.target.value);
     },
 
-    // update the text of the item on keypress but throttle the event to ensure
-    // we don't flood the server with updates (handles the event at most once
-    // every 300ms)
+    'click #login': function(event) {
+        // alert($("#password").value);
+        var value = document.getElementById('password').value;
+        if (value === Session.get("password")) {
+            Session.set("login", true);
+        } else {
+            alert("Your password is incorrect!");
+        }
+    },
+
     'keyup input[type=number]': function(event) {
         var charCode = (event.which) ? event.which : event.keyCode;
         if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
@@ -219,5 +220,14 @@ Template.status.events({
         event.target.value;
         console.log(event.target.value);
         Session.set("MAX", event.target.value);
+    },
+
+    'click #startBtn': function(event, template) {
+        data = Board.findOne("id");
+        data.history = [];
+        data.position = "start";
+        Session.set('counter', 0);
+        Session.set('direction', 'w');
+        Board.update("id", data);
     },
 })

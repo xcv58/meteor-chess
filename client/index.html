@@ -3,11 +3,12 @@
 </head>
 
 <body>
-  <h1>Haihua Wang's Chess</h1>
-  {{> main}}
-  {{> button}}
+  <div id="body">
+    <h1>Haihua Wang's Chess</h1>
+    {{> main}}
 
-  {{> status}}
+    {{> status}}
+  </div>
 </body>
 
 <template name="main">
@@ -15,13 +16,14 @@
   <div id="board" style="width: 500px"></div>
 </template>
 
-<template name="button">
-  <input type="button" id="startBtn" value="Restart" class="button"/>
-</template>
-
 <template name="status">
-  <p>Status: <span id="status"></span></p>
+  {{#if login}}
   <p>Count: {{count}} Max Steps: <input type="number" min="1" id="max" placeholder="{{max}}" /></p>
+  <input type="button" id="startBtn" value="Restart" class="button"/>
+  {{else}}
+  <input type="password" id="password" placeholder="admin password" /><input type="button" id="login" value="Login" class="button"/>
+  {{/if}}
+  <p>Status: <span id="status"></span></p>
   <p>FEN: <span id="fen"></span></p>
   <p>PGN: <span id="pgn"></span></p>
 </template>

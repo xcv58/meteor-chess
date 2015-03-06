@@ -1,6 +1,17 @@
 /* CSS declarations go here */
 
+#body {
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+}
+
 #max {
     display:inline;
     width:180px;
+}
+
+#password {
+    display:inline;
+    width:auto;
 }
