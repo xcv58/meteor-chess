@@ -8,3 +8,11 @@ Meteor.publish("board", function () {
     }
     return Board.find();
 });
+
+Meteor.publish("tokens", function () {
+    return Tokens.find();
+});
+
+Meteor.publish("history", function () {
+    return History .find();
+});

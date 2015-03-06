@@ -3,6 +3,10 @@ var board, game;
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
 var onDragStart = function(source, piece, position, orientation) {
+    if (Session.get("noinvite")) {
+        alert("Please input invite code");
+        return false;
+    }
     if (Session.get("counter") >= Session.get("MAX")) {
         alert("run out");
         return false;
@@ -40,6 +44,9 @@ var onDrop = function(source, target) {
     Board.update("id", data);
 
     Session.set('counter', Session.get('counter') + 1);
+    invite = Tokens.findOne(Session.get('invite'));
+    invite.count = invite.count - 1;
+    Tokens.update(invite._id, invite);
 
     updateStatus();
 };
@@ -155,11 +162,22 @@ Meteor.subscribe('board', function() {
     createBoard();
 });
 
+Meteor.subscribe('history');
+
+Meteor.subscribe('tokens');
+
 Meteor.startup(function (){
     Session.setDefault('counter', 0);
     Session.setDefault('MAX', 1);
     Session.setDefault('password', 'password');
     Session.setDefault('login', false);
+    Session.setDefault('noinvite', true);
+});
+
+Template.invite.helpers({
+    noinvite: function() {
+        return Session.get('noinvite');
+    }
 });
 
 Template.main.helpers({
@@ -191,8 +209,34 @@ Template.status.helpers({
     },
     login: function() {
         return Session.get('login');
-    }
+    },
+    invites: function() {
+        var invites = Tokens.find({count : 1}).fetch();
+        var lines = '';
+        for (i in invites) {
+            if (invites[i].count > 0) {
+                lines += invites[i]._id + '\n';
+            }
+        }
+        return lines;
+    },
 })
+Template.invite.events({
+    'click #inviteButton': function(event) {
+        var value = document.getElementById('inviteInput').value;
+        var result = Tokens.findOne(value);
+        if (result === undefined) {
+            alert("Invalid invite code!");
+            return;
+        }
+        if (result.count === 0) {
+            alert("Invite code already used!");
+            return;
+        }
+        Session.set("noinvite", false);
+        Session.set("invite", value);
+    }
+});
 
 Template.status.events({
     'keydown input[type=number]': function(event) {
@@ -230,6 +274,27 @@ Template.status.events({
 
     'click #startBtn': function(event, template) {
         data = Board.findOne("id");
+        var history = data.history;
+        console.log(history);
+        // History.
+        History.insert({
+            createdAt: new Date(),
+            content: history
+        });
+
+        var tokens = Tokens.find().fetch();
+
+        for (i in tokens) {
+            console.log(i);
+            Tokens.remove(tokens[i]._id);
+        }
+
+        for (i = 0; i < 100; i++) {
+            Tokens.insert({
+                count: 1
+            });
+        }
+
         data.history = [];
         data.position = "start";
         Session.set('counter', 0);

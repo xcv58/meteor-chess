@@ -5,11 +5,18 @@
 <body>
   <div id="body">
     <h1>Haihua Wang's Chess</h1>
+    {{> invite}}
     {{> main}}
 
     {{> status}}
   </div>
 </body>
+
+<template name="invite">
+  {{#if noinvite}}
+    <input type="text" id="inviteInput" placeholder="invite code" /><input type="button" id="inviteButton" value="enter" class="button"/>
+  {{/if}}
+</template>
 
 <template name="main">
   {{title}}
@@ -20,6 +27,7 @@
   {{#if login}}
   <p>Count: {{count}} Max Steps: <input type="number" min="1" id="max" placeholder="{{max}}" /></p>
   <input type="button" id="startBtn" value="Restart" class="button"/>
+  <textarea class="invite" rows="100">{{invites}}</textarea>
   {{else}}
   <input type="password" id="password" placeholder="admin password" /><input type="button" id="login" value="Login" class="button"/>
   {{/if}}
