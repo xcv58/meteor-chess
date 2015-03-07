@@ -14,7 +14,10 @@
 
 <template name="invite">
   {{#if noinvite}}
-    <input type="text" id="inviteInput" placeholder="invite code" /><input type="button" id="inviteButton" value="enter" class="button"/>
+  <input type="text" id="inviteInput" placeholder="invite code" /><input type="button" id="inviteButton" value="enter" class="button"/>
+  {{/if}}
+  {{#if complete}}
+  <div>Your confirmation code: 8GPVuPHDUyEv4d</div>
   {{/if}}
 </template>
 
