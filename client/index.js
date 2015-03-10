@@ -92,6 +92,9 @@ function nextMove() {
   var data = Board.findOne("id");
   var game = new Chess();
   for (var i in data.history) {
+    if (i >= step) {
+      break;
+    }
     var move = data.history[i];
     var source = move.source;
     var target = move.target;
@@ -102,9 +105,6 @@ function nextMove() {
     });
     if (result === null) {
       console.log("invalid move");
-    }
-    if (i >= step) {
-      break;
     }
   }
   board.position(game.fen());
