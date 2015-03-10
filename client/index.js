@@ -86,6 +86,43 @@ function updateGame() {
   return game.turn();
 }
 
+function nextMove() {
+  var step = Session.get("currentStep");
+  Session.set("currentStep", step + 1);
+  var data = Board.findOne("id");
+  var game = new Chess();
+  for (var i in data.history) {
+    var move = data.history[i];
+    var source = move.source;
+    var target = move.target;
+    var result = game.move({
+      from: source,
+      to: target,
+      promotion: 'q' // NOTE: always promote to a queen for example simplicity
+    });
+    if (result === null) {
+      console.log("invalid move");
+    }
+    if (i >= step) {
+      break;
+    }
+  }
+  board.position(game.fen());
+  // direction = Session.get("direction");
+  // if (direction === undefined) {
+  //   direction = game.turn();
+  //   Session.set("direction", direction);
+  // }
+  // if (direction === 'w') {
+  //   board.orientation('white');
+  // } else {
+  //   board.orientation('black');
+  // }
+
+  // updateStatus();
+  // return game.turn();
+}
+
 var updateStatus = function() {
   var status = '';
 
@@ -172,6 +209,7 @@ Meteor.startup(function (){
   Session.setDefault('password', 'password');
   Session.setDefault('login', false);
   Session.setDefault('noinvite', true);
+  Session.setDefault('currentStep', 0);
 });
 
 Template.invite.helpers({
@@ -304,4 +342,8 @@ Template.status.events({
     Session.set('direction', 'w');
     Board.update("id", data);
   },
-})
+
+  'click #nextMove': function(event) {
+    nextMove();
+  }
+});
